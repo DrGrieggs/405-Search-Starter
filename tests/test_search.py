@@ -5,7 +5,7 @@ Run from the repository folder:  python -m pytest tests/test_search.py -v
 
 import pytest
 
-from search import (Problem, Node, RouteProblem, make_graph, path_states, romania,
+from search import (Problem, Node, RouteProblem, make_graph, path_states, western_pa,
                     breadth_first_search, depth_first_search,
                     best_first_search, uniform_cost_search)
 
@@ -64,17 +64,17 @@ ALL_SEARCHES = [
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("search", ALL_SEARCHES)
-def test_finds_a_valid_route_arad_to_bucharest(search):
-    problem = RouteProblem("Arad", "Bucharest", romania)
+def test_finds_a_valid_route_indiana_to_erie(search):
+    problem = RouteProblem("Indiana", "Erie", western_pa)
     assert_valid_solution(problem, search(problem))
 
 
 @pytest.mark.parametrize("search", ALL_SEARCHES)
 def test_start_is_already_the_goal(search):
-    problem = RouteProblem("Arad", "Arad", romania)
+    problem = RouteProblem("Indiana", "Indiana", western_pa)
     node = search(problem)
     assert node is not None
-    assert path_states(node) == ["Arad"]
+    assert path_states(node) == ["Indiana"]
     assert node.path_cost == 0
 
 
@@ -94,10 +94,12 @@ def test_finds_a_route_on_a_grid(search):
 # Part 1: breadth-first search
 # ---------------------------------------------------------------------------
 
-def test_bfs_finds_fewest_actions_on_romania():
-    node = breadth_first_search(RouteProblem("Arad", "Bucharest", romania))
-    assert node.depth() == 3
-    assert path_states(node) == ["Arad", "Sibiu", "Fagaras", "Bucharest"]
+def test_bfs_finds_fewest_actions_indiana_to_erie():
+    # Several 5-road routes reach Erie; any of them is correct.
+    problem = RouteProblem("Indiana", "Erie", western_pa)
+    node = breadth_first_search(problem)
+    assert_valid_solution(problem, node)
+    assert node.depth() == 5
 
 
 def test_bfs_minimizes_actions_not_cost():
@@ -118,14 +120,14 @@ def test_bfs_finds_shortest_path_on_a_grid():
 # ---------------------------------------------------------------------------
 
 def test_dfs_terminates_on_a_map_with_cycles():
-    # Romania has loops (Arad-Zerind-Oradea-Sibiu-Arad); without a cycle
-    # check this test times out.
-    problem = RouteProblem("Arad", "Bucharest", romania)
+    # The map has loops (Somerset-Latrobe-Greensburg-Somerset); without a
+    # cycle check this test times out.
+    problem = RouteProblem("Indiana", "Erie", western_pa)
     assert_valid_solution(problem, depth_first_search(problem))
 
 
 def test_dfs_path_never_repeats_a_state():
-    node = depth_first_search(RouteProblem("Arad", "Bucharest", romania))
+    node = depth_first_search(RouteProblem("Indiana", "Erie", western_pa))
     states = path_states(node)
     assert len(states) == len(set(states)), "the returned path contains a cycle"
 
@@ -141,10 +143,18 @@ def test_dfs_explores_unreachable_goal_and_gives_up():
 # Part 3: best-first search
 # ---------------------------------------------------------------------------
 
-def test_ucs_finds_cheapest_route_on_romania():
-    node = uniform_cost_search(RouteProblem("Arad", "Bucharest", romania))
-    assert node.path_cost == 418
-    assert path_states(node) == ["Arad", "Sibiu", "Rimnicu Vilcea", "Pitesti", "Bucharest"]
+def test_ucs_finds_cheapest_route_indiana_to_erie():
+    node = uniform_cost_search(RouteProblem("Indiana", "Erie", western_pa))
+    assert node.path_cost == 156
+    assert path_states(node) == ["Indiana", "Kittanning", "Butler", "Grove City", "Meadville", "Erie"]
+
+
+def test_ucs_finds_cheapest_of_equal_length_routes():
+    # Two 3-road routes reach Uniontown: via Pittsburgh (103 mi) and via
+    # Greensburg (72 mi). Only the cheaper one is correct.
+    node = uniform_cost_search(RouteProblem("Indiana", "Uniontown", western_pa))
+    assert node.path_cost == 72
+    assert path_states(node) == ["Indiana", "Blairsville", "Greensburg", "Uniontown"]
 
 
 def test_ucs_prefers_cheap_path_over_short_path():
@@ -154,10 +164,12 @@ def test_ucs_prefers_cheap_path_over_short_path():
 
 
 def test_ucs_uses_late_goal_test():
-    # Figure 3.10: Bucharest is first generated via Fagaras (cost 310), but the
-    # cheaper path via Pitesti (cost 278) must win. An early goal test returns 310.
-    node = uniform_cost_search(RouteProblem("Sibiu", "Bucharest", romania))
-    assert node.path_cost == 278
+    # Like Figure 3.10: Brookville is first generated via Kittanning (66 mi),
+    # but the cheaper path via Punxsutawney (48 mi) must win. An early goal
+    # test returns 66.
+    node = uniform_cost_search(RouteProblem("Indiana", "Brookville", western_pa))
+    assert node.path_cost == 48
+    assert path_states(node) == ["Indiana", "Punxsutawney", "Brookville"]
 
 
 def test_best_first_updates_reached_with_cheaper_path():
@@ -170,8 +182,8 @@ def test_best_first_updates_reached_with_cheaper_path():
 
 def test_best_first_respects_the_evaluation_function():
     # With f(n) = depth, best-first search finds the fewest actions, like BFS.
-    node = best_first_search(RouteProblem("Arad", "Bucharest", romania), lambda n: n.depth())
-    assert node.depth() == 3
+    node = best_first_search(RouteProblem("Indiana", "Erie", western_pa), lambda n: n.depth())
+    assert node.depth() == 5
 
 
 def test_best_first_handles_ties_without_comparing_nodes():

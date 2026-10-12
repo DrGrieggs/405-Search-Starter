@@ -14,7 +14,7 @@ python -m pip install -r requirements.txt
 
 | File | What you do with it |
 | --- | --- |
-| `search.py` | The problem and node framework, plus the Romania map. **Parts 1–3:** fill in `breadth_first_search`, `depth_first_search`, and `best_first_search` at the bottom. |
+| `search.py` | The problem and node framework, plus a road map of western Pennsylvania. **Parts 1–3:** fill in `breadth_first_search`, `depth_first_search`, and `best_first_search` at the bottom. |
 | `problems.py` | **Part 4:** finish the knight and queens formulations, and fill in `solve_ambulance`, `solve_knight`, and `solve_queens` with the search you choose. |
 | `ANSWERS.md` | Your written answers: the worksheet questions and your algorithm justifications. |
 | `tests/` | The test suite. Don't edit it. |
@@ -38,21 +38,25 @@ python -m pytest tests/test_search.py -k depth -v     # depth-first tests
 
 All tests fail until you write code; that's expected. Work through them part by part.
 
-To see your algorithms run on the Romania map:
+To see your algorithms run on the map, from Indiana to Erie:
 
 ```
 python search.py
 python problems.py
 ```
 
+## The map
+
+Instead of the textbook's Romania map, this repository uses 24 towns in western Pennsylvania and the 49 main roads between them, with Indiana as the starting point. Each road's length is the real driving distance in miles between town centers, from the OpenStreetMap routing engine ([OSRM](https://project-osrm.org/)), rounded to the nearest mile. Like Figure 3.1 it is simplified to main highways, so a few real trips are a little shorter than the map allows.
+
 ## What the tests check
 
 **`tests/test_search.py` (Parts 1–3)**
 
 - Every search returns a legal path from start to goal with the correct `path_cost`, handles a start that is already the goal, and returns `None` when the goal can't be reached.
-- Breadth-first search finds the fewest actions (3 from Arad to Bucharest), even when that isn't the cheapest route.
+- Breadth-first search finds the fewest actions (5 roads from Indiana to Erie), even when that isn't the cheapest route.
 - Depth-first search terminates on a map with cycles and never returns a path that repeats a state.
-- Best-first search with path cost finds the cheapest route (418 miles), uses a late goal test (Sibiu to Bucharest costs 278, not 310), updates `reached` when it finds a cheaper path, and handles ties in the priority queue.
+- Best-first search with path cost finds the cheapest route (156 miles to Erie; 72, not 103, to Uniontown), uses a late goal test (Indiana to Brookville costs 48, not 66), updates `reached` when it finds a cheaper path, and handles ties in the priority queue.
 
 **`tests/test_problems.py` (Part 4)**
 

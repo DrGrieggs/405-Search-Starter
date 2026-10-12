@@ -86,20 +86,31 @@ def is_cycle(node):
 
 
 # ---------------------------------------------------------------------------
-# Route finding on a map, and the Romania map (Figure 3.1)
+# Route finding on a map: main roads of western Pennsylvania
 # ---------------------------------------------------------------------------
 
+# Each road's length is the real driving distance in miles between the two
+# towns' centers, from the OpenStreetMap routing engine (OSRM), rounded to
+# the nearest mile. Like the textbook's Romania map (Figure 3.1), it is
+# simplified: 24 towns and the main highways between them.
 ROADS = [
-    ("Arad", "Zerind", 75), ("Arad", "Sibiu", 140), ("Arad", "Timisoara", 118),
-    ("Zerind", "Oradea", 71), ("Oradea", "Sibiu", 151), ("Timisoara", "Lugoj", 111),
-    ("Lugoj", "Mehadia", 70), ("Mehadia", "Drobeta", 75), ("Drobeta", "Craiova", 120),
-    ("Craiova", "Rimnicu Vilcea", 146), ("Craiova", "Pitesti", 138),
-    ("Sibiu", "Rimnicu Vilcea", 80), ("Sibiu", "Fagaras", 99),
-    ("Rimnicu Vilcea", "Pitesti", 97), ("Fagaras", "Bucharest", 211),
-    ("Pitesti", "Bucharest", 101), ("Bucharest", "Giurgiu", 90),
-    ("Bucharest", "Urziceni", 85), ("Urziceni", "Hirsova", 98),
-    ("Hirsova", "Eforie", 86), ("Urziceni", "Vaslui", 142),
-    ("Vaslui", "Iasi", 92), ("Iasi", "Neamt", 87),
+    ("Indiana", "Blairsville", 16), ("Indiana", "Kittanning", 27), ("Indiana", "Punxsutawney", 28),
+    ("Indiana", "Ebensburg", 29), ("Indiana", "Johnstown", 27), ("Blairsville", "Latrobe", 12),
+    ("Blairsville", "Johnstown", 25), ("Blairsville", "Ebensburg", 31), ("Blairsville", "Pittsburgh", 42),
+    ("Latrobe", "Greensburg", 11), ("Blairsville", "Greensburg", 20), ("Greensburg", "Pittsburgh", 34),
+    ("Ebensburg", "Johnstown", 18), ("Ebensburg", "Altoona", 24), ("Kittanning", "Butler", 23),
+    ("Kittanning", "Pittsburgh", 42), ("Pittsburgh", "Butler", 33), ("Butler", "New Castle", 27),
+    ("Butler", "Grove City", 25), ("Butler", "Franklin", 43), ("New Castle", "Grove City", 21),
+    ("Grove City", "Meadville", 40), ("Grove City", "Franklin", 24), ("Meadville", "Erie", 41),
+    ("Franklin", "Meadville", 27), ("Franklin", "Clarion", 29), ("Kittanning", "Clarion", 37),
+    ("Clarion", "Brookville", 20), ("Brookville", "Punxsutawney", 20), ("Brookville", "DuBois", 20),
+    ("Punxsutawney", "DuBois", 20), ("DuBois", "Clearfield", 21), ("Clearfield", "State College", 41),
+    ("Altoona", "State College", 41), ("Pittsburgh", "Washington", 27), ("Washington", "Uniontown", 44),
+    ("Uniontown", "Greensburg", 36), ("Greensburg", "Somerset", 43), ("Somerset", "Johnstown", 28),
+    ("Altoona", "Clearfield", 50), ("Somerset", "Uniontown", 50), ("Pittsburgh", "Uniontown", 45),
+    ("Latrobe", "Somerset", 33), ("Kittanning", "Greensburg", 42), ("Kittanning", "Brookville", 39),
+    ("Greensburg", "Washington", 47), ("Clarion", "Grove City", 43), ("Butler", "Clarion", 50),
+    ("Ebensburg", "DuBois", 57),
 ]
 
 
@@ -129,7 +140,7 @@ class RouteProblem(Problem):
         return self.graph[s][a]
 
 
-romania = make_graph(ROADS)
+western_pa = make_graph(ROADS)
 
 
 # ---------------------------------------------------------------------------
@@ -173,7 +184,7 @@ def uniform_cost_search(problem):
 
 
 if __name__ == "__main__":
-    trip = RouteProblem("Arad", "Bucharest", romania)
+    trip = RouteProblem("Indiana", "Erie", western_pa)
     for name, search in [("Breadth-first", breadth_first_search),
                          ("Depth-first", depth_first_search),
                          ("Uniform-cost", uniform_cost_search)]:
